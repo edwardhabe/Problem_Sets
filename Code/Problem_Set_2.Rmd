@@ -2,8 +2,6 @@
 title: "Problem Set 2"
 output: html_notebook
 ---
-## Problem Set #2 
-
 
 I'll begin by setting up the standard code and clearing R's brain. Here, any necessary packages for further code will be installed. 
 
