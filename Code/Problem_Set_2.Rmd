@@ -1,0 +1,155 @@
+---
+title: "Problem Set 2"
+output: html_notebook
+---
+## Problem Set #2 
+
+
+I'll begin by setting up the standard code and clearing R's brain. Here, any necessary packages for further code will be installed. 
+
+```{r}
+rm(list = ls())
+library(here)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+The first step of working on a data set is to import the data itself. It's important to note that the correct file path must be specified. 
+
+```{r}
+Halloween_Data <- read.csv(here("Data", "Halloween_data_PS2.csv"))
+
+## here() function ensures that we're following the correct file path. "Data" specifies that we're collecting our .csv file from the desired folder. 
+```
+
+Next, I'll begin cleaning up and formatting the data set. I chose to change column names, making them all capitalized. 
+
+```{r}
+names(Halloween_Data) <- c("Costume", "Type", "Candy_Pieces", "Age")
+
+## names() function allows for column names of a data set to be altered. New column names can be listed out following c() in their intended order within quotation marks. 
+```
+
+Following my editing of column names, I tidied my data by replacing typos and differently capitalized terms. For example, there were differently capitalized variations of "Wonder Woman" which become fully capitalized in all cases. For "Clown"/"Creepy Clown", I had to decide on which form I would use. As more cells contained "Creepy Clown" than "Clown" and the costume was listed as "Scary", I chose to use "Creepy Clown" for all cells. 
+
+```{r}
+Halloween_Data[1:8, "Costume"] <- "Wonder Woman"
+Halloween_Data[9:13, "Costume"] <- "Creepy Clown"
+Halloween_Data[25:27, "Costume"] <- "Witch"
+Halloween_Data[28:30, "Costume"] <- "Pirate"
+
+Halloween_Data[25:30, "Type"]<- "Scary"
+
+## Indexing allows for selection of multiple rows of data at once, inputted as being between x to y (x:y).Following this will be the column which these cells fall under. A new value will be assigned to the cells via "<-". 
+``` 
+
+In this next step, I've altered the data type of columns 'Costume' and 'Type'. Both columns were initially "character" data. However, we need these to be "factor" data to work with them further.
+
+```{r}
+Halloween_Data$Costume <- as.factor(Halloween_Data$Costume)
+Halloween_Data$Type <- as.factor(Halloween_Data$Type)
+
+## as.factor() is used to convert selected columns into factor type data. $ selects a column from the specified data set, and is then assigned to itself through the function. 
+```
+
+Now, to check if 'Costume' and 'Type' have successfully been converted to factors. 
+
+```{r}
+str(Halloween_Data)
+
+## str() will show the data type of all columns. If factors are present, it will give the number of total levels. After running this code, I know that my desired columns have been transformed into factors rather than characters. 
+```
+
+This function will let me check if I've successfully prevented duplicate levels of inputted data (through typos or variations in capitalization). If duplicates are present, then the data set has been tidied. I'll check for both 'Type' and 'Costume', as these were both previously character data. 
+
+```{r}
+levels(Halloween_Data$Costume)
+
+levels(Halloween_Data$Type)
+
+## levels() writes out all variations of data present in a column. When using str(), we only get the number of levels. Using this function instead, we can ensure that levels have been minimized as much as possible in our tidy data set. 
+```
+
+Here are some more functions which can be used to analyze a data set. These can be used to get a better idea of what we're working with, and can help with many important calculations. 
+
+```{r}
+head(Halloween_Data)
+
+tail(Halloween_Data)
+
+dim(Halloween_Data)
+
+summary(Halloween_Data)
+
+## Data set is entered within function parenthesis. We want the functions to look over the entire tidied data set to gather information. head() and tail() will provide the first and last 6 rows of data, respectively. Next, dim() will give the overall dimensions of the data set. Finally, summary() allows me to view statistics within the data set such as quartiles, standard deviations, minimums, and maximums. 
+
+```
+
+This is where I began to work on Chart #1 of the problem set. My first priority was to create a new data set from the initial one. I needed to construct a scatterplot depicting the mean age of trick-or-treaters, the mean number of candy pieces taken, and also if specific costumes were scary or not scary. For this, I created two new data sets, one for the mean pieces of candy taken by costume, and another for the average age of trick-or-treaters by costume. 
+
+```{r}
+AvgPieces_Costume <- Halloween_Data %>% group_by(Costume) %>% summarise(AvgPieces_Costume = mean(Candy_Pieces, na.rm=TRUE))
+
+AvgAge_Costume <- Halloween_Data %>% group_by(Costume) %>% summarise(AvgAge_Costume = mean(Age, na.rm=TRUE))
+
+## My first data set (AvgPieces_Costume) depicts the mean number of candy pieces taken by costume type. Using piping, I grouped out data from the "Costume" column of Halloween_Data using group_by(). I then gathered the mean number of candy pieces taken by costume using summarise() and mean(). Some cells were marked as NA, meaning that they needed to be removed to prevent R from breaking. To do this, I incorporated na.rm=TRUE into my function for gathering mean pieces by costume, eliminating any rows containing NA. My second data set is basically the same concept as the first. Again, I grouped by the costume column, but rather than pieces of candy taken, I substituted for mean Age. These two data sets will become the x and y axes of my scatterplot. 
+``` 
+
+Before I made the chart itself, it was necessary to clean up and reformat the data I would use. In this process, I also merged my two previous data sets into one, which I named Halloween_Data_Chart1. I created a new column for "Type", as this could be needed for replicating the scatterplot. Once added, I rearranged the order of columns so that scary costumes would appear first, and non-scary costumes would appear last. From there, I assigned values to my new "Type" column. 
+
+```{r}
+Halloween_Data_Chart1 <- mutate(AvgPieces_Costume, AvgAge_Costume)
+
+Halloween_Data_Chart1 <- mutate(Halloween_Data_Chart1, Type=NA)
+
+Halloween_Data_Chart1 <- Halloween_Data_Chart1[c(1, 4, 7, 9, 2:3, 5:6, 8),]
+
+Halloween_Data_Chart1[1:4, "Type"] <- "Scary"
+Halloween_Data_Chart1[5:9, "Type"] <- "Not Scary"
+
+## The mutate() function allowed me to create new columns of data, where I added AvgPieces_Costume and AvgAge_Costume to Halloween_Data_Chart1. Using mutate() again, I created the "Type" column. With c(), I could rearrange the order of rows individually or as a range (e.g. using : between numbers to specify a range). Finally, I used indexing to assign the first four rows "Scary", and the final five "Not Scary" in the Type column. This process was made easier by initially dividing scary and non-scary costumes into separate areas on the data set. 
+```
+
+Now, I'll make the first chart itself. Here, I assigned X and Y axes, and specified that I wanted colour to be representative of costume type (Type column). I also labeled the X and Y axes, which would be different than the names of inputted data. 
+
+```{r}
+ggplot(Halloween_Data_Chart1, aes(x = AvgAge_Costume, y = AvgPieces_Costume, colour = Type)) +
+  geom_point(size=5) +
+  xlab("Mean Age of Child (Years)") +
+  ylab("Mean Pieces of Candy")
+
+## ggplot is excellent for making a variety of charts. Making a scatterplot is quite straightforward. First, a data set is selected, Halloween_Data_Chart1 in this case. Within aes(), the x and y axes are assigned. My x axis will be data contained within AvgAge_Costume, and my y axis will contain the data of AvgPieces_Costume. colour = Type should be inputted within aes() as well, commas separating this and both axes. geom_point() must be added for points to appear on the chart--within this, size of points can be specified. Between lines of code for different functions, + should be added to combine everything into the chart. xlab() and ylab() are used for assigning names of axes, which are to be written in quotation marks. 
+```
+
+Now, to begin working on the second chart. This one will be a histogram which contains only data from trick-or-treaters who are under 10 years old and wore "Not Scary" costumes. 
+
+```{r}
+Halloween_Data_Chart2 <- filter(Halloween_Data, Age <= 10 & Type !="Scary") 
+
+## To make this new data set, I used the filter() function. Within filter(), I specified that data would come from the initial Halloween_Data, that ages would be equal to or less than 10 (<=), and no Scary Halloween costumes would be present from Type (!= signifies 'not equal to'). 
+``` 
+
+Setting up the data for this chart and making the chart itself was much more straightforward than the last. A different function is necessary, however. In order to match the example chart, some formatting needed to be done. 
+
+```{r}
+ggplot(Halloween_Data_Chart2, aes(x = Age)) +
+  geom_histogram(bins=4) 
+
+## ggplot was used again for creating this graph with my chart #2 data set. Unlike the first chart, this one only takes the x-axis into account, since it's a histogram. Y axis will automatically become 'count' of the x axis. Initially, the bars of the graph were very far apart. To fix this, "bins" needed to be changed under geom_histogram(). I found that bins=4 most closely matched the example after playing around with it. 
+
+```
+
+Onto the final chart! No new data set needed to be made for this one--just more in depth formatting. This box plot demonstrates the costume choice by age of trick-or-treaters.
+
+```{r}
+ggplot(Halloween_Data, aes(x = Costume, y = Age))  +
+  geom_boxplot() +
+xlab("Costume Choice") +
+ylab("Child Age (Years)") +
+  facet_wrap(~ Type) +
+  coord_flip()
+
+## The original Halloween_Data was used for this chart, where x axis equals Costume and y axis represents age. geom_boxplot() is used, and the x and y axes are labelled accordingly like in chart #1. the function facet_wrap() allows for multiple charts to be created at once, showing scary vs. non-scary costumes in different box plots. In order for the x- axis to be readable and not full of overlapping words, coord_flip() was used to switch the places of the x and y axes. 
+```
+
