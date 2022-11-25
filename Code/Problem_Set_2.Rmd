@@ -41,6 +41,8 @@ Halloween_Data[25:30, "Type"]<- "Scary"
 
 ## Indexing allows for selection of multiple rows of data at once, inputted as being between x to y (x:y).Following this will be the column which these cells fall under. A new value will be assigned to the cells via "<-". 
 ``` 
+Indexing is ok, but it cannot be automated and requires you, the human, to read the data and determine which cells to change. That is possible (but hard) in a dataset of 46 rows, but what if you had 46,000 rows? A better option would be to use `which()` to determine the rows that meet certain conditions. See the key for an example.
+
 
 In this next step, I've altered the data type of columns 'Costume' and 'Type'. Both columns were initially "character" data. However, we need these to be "factor" data to work with them further.
 
@@ -93,6 +95,8 @@ AvgAge_Costume <- Halloween_Data %>% group_by(Costume) %>% summarise(AvgAge_Cost
 
 ## My first data set (AvgPieces_Costume) depicts the mean number of candy pieces taken by costume type. Using piping, I grouped out data from the "Costume" column of Halloween_Data using group_by(). I then gathered the mean number of candy pieces taken by costume using summarise() and mean(). Some cells were marked as NA, meaning that they needed to be removed to prevent R from breaking. To do this, I incorporated na.rm=TRUE into my function for gathering mean pieces by costume, eliminating any rows containing NA. My second data set is basically the same concept as the first. Again, I grouped by the costume column, but rather than pieces of candy taken, I substituted for mean Age. These two data sets will become the x and y axes of my scatterplot. 
 ``` 
+You could save yourself a lot of trouble by using group_by to include BOTH costume and type. That would eliminate the need to then join the datasets together again below.
+
 
 Before I made the chart itself, it was necessary to clean up and reformat the data I would use. In this process, I also merged my two previous data sets into one, which I named Halloween_Data_Chart1. I created a new column for "Type", as this could be needed for replicating the scatterplot. Once added, I rearranged the order of columns so that scary costumes would appear first, and non-scary costumes would appear last. From there, I assigned values to my new "Type" column. 
 
@@ -108,6 +112,8 @@ Halloween_Data_Chart1[5:9, "Type"] <- "Not Scary"
 
 ## The mutate() function allowed me to create new columns of data, where I added AvgPieces_Costume and AvgAge_Costume to Halloween_Data_Chart1. Using mutate() again, I created the "Type" column. With c(), I could rearrange the order of rows individually or as a range (e.g. using : between numbers to specify a range). Finally, I used indexing to assign the first four rows "Scary", and the final five "Not Scary" in the Type column. This process was made easier by initially dividing scary and non-scary costumes into separate areas on the data set. 
 ```
+Again, you are using indexing, which is good, but in a way that requires a human to find the correct rows, which is inefficient at best and likely to result in mistakes in a larger data set.
+
 
 Now, I'll make the first chart itself. Here, I assigned X and Y axes, and specified that I wanted colour to be representative of costume type (Type column). I also labeled the X and Y axes, which would be different than the names of inputted data. 
 
@@ -137,6 +143,8 @@ ggplot(Halloween_Data_Chart2, aes(x = Age)) +
 ## ggplot was used again for creating this graph with my chart #2 data set. Unlike the first chart, this one only takes the x-axis into account, since it's a histogram. Y axis will automatically become 'count' of the x axis. Initially, the bars of the graph were very far apart. To fix this, "bins" needed to be changed under geom_histogram(). I found that bins=4 most closely matched the example after playing around with it. 
 
 ```
+You didn't adjust the x and y labels to match.
+
 
 Onto the final chart! No new data set needed to be made for this one--just more in depth formatting. This box plot demonstrates the costume choice by age of trick-or-treaters.
 
@@ -150,4 +158,5 @@ ylab("Child Age (Years)") +
 
 ## The original Halloween_Data was used for this chart, where x axis equals Costume and y axis represents age. geom_boxplot() is used, and the x and y axes are labelled accordingly like in chart #1. the function facet_wrap() allows for multiple charts to be created at once, showing scary vs. non-scary costumes in different box plots. In order for the x- axis to be readable and not full of overlapping words, coord_flip() was used to switch the places of the x and y axes. 
 ```
+
 
